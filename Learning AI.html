@@ -1,0 +1,773 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Learning AI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: sticky-less top bar (logo, XP, streak) + tab row; cards grid for units; full-screen lesson player; profile card with link buttons */
+:root{
+  --bg:#f5f3fc; --surface:#ffffff; --fg:#1c1935; --muted:#675f86; --line:#e0dbf0;
+  --accent:#5b3df5; --accent-deep:#3d24c2; --accent-soft:#ece8ff; --on-accent:#ffffff;
+  --sun:#ffc533; --sun-deep:#d49a00; --sun-ink:#4a3500;
+  --good:#17895a; --good-soft:#d9f4e6; --bad:#cf3148; --bad-soft:#fde2e7;
+  --font-display:'Fredoka','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14122a; --surface:#1e1b3b; --fg:#f0eefc; --muted:#aaa4cc; --line:#34305c;
+    --accent:#8b73ff; --accent-deep:#5a43d4; --accent-soft:#2b2658; --on-accent:#120e33;
+    --sun:#ffd24d; --sun-deep:#c79500; --sun-ink:#3b2c00;
+    --good:#4cd69b; --good-soft:#163a2e; --bad:#ff7a8d; --bad-soft:#42202a;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14122a; --surface:#1e1b3b; --fg:#f0eefc; --muted:#aaa4cc; --line:#34305c;
+  --accent:#8b73ff; --accent-deep:#5a43d4; --accent-soft:#2b2658; --on-accent:#120e33;
+  --sun:#ffd24d; --sun-deep:#c79500; --sun-ink:#3b2c00;
+  --good:#4cd69b; --good-soft:#163a2e; --bad:#ff7a8d; --bad-soft:#42202a;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.5;
+  padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+p{margin:0}
+.wrap{max-width:940px;margin:0 auto;padding-block:16px 40px}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+button{font:inherit;color:inherit}
+
+/* top bar */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:1.5rem;letter-spacing:.01em}
+.brand svg{width:40px;height:40px;flex:none}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:5px 12px 5px 9px;font-weight:800;font-variant-numeric:tabular-nums}
+.chip svg{width:20px;height:20px}
+.tabs{display:flex;gap:6px;margin-top:16px;border-bottom:2px solid var(--line);overflow-x:auto}
+.tab{background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-2px;padding:10px 14px;font-weight:800;color:var(--muted);cursor:pointer;white-space:nowrap;letter-spacing:.02em}
+.tab[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--on-accent);border:0;border-bottom:4px solid var(--accent-deep);border-radius:14px;padding:12px 22px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;font-size:.9rem;cursor:pointer;text-decoration:none}
+.btn:active{transform:translateY(2px);border-bottom-width:2px}
+.btn[disabled]{background:var(--line);color:var(--muted);border-bottom-color:var(--line);cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--surface);color:var(--accent);border:2px solid var(--line);border-bottom-width:4px}
+.btn.good{background:var(--good);border-bottom-color:var(--good);filter:brightness(.92)}
+.btn.bad{background:var(--bad);border-bottom-color:var(--bad);filter:brightness(.92)}
+.btn.sm{padding:8px 14px;font-size:.8rem}
+.iconbtn{width:52px;height:52px;border-radius:50%;padding:0;flex:none}
+.iconbtn svg{width:26px;height:26px}
+
+/* home */
+.hero{margin-top:28px;display:grid;gap:6px}
+.hero h1{font-size:clamp(1.8rem,5vw,2.6rem)}
+.hero p{color:var(--muted);max-width:56ch}
+.units{margin:24px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px}
+.unit{background:var(--surface);border:2px solid var(--line);border-bottom-width:5px;border-radius:20px;padding:18px;display:flex;gap:16px;align-items:center;min-width:0}
+.ring{width:72px;height:72px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(var(--sun) calc(var(--p)*1%),var(--line) 0)}
+.ring span{width:56px;height:56px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:1.5rem}
+.unit h3{font-size:1.2rem}
+.unit .meta{color:var(--muted);font-size:.9rem;margin:2px 0 10px}
+.unit>div{min-width:0}
+
+/* sections */
+.panel{background:var(--surface);border:2px solid var(--line);border-bottom-width:5px;border-radius:20px;padding:20px}
+.sechead{display:grid;gap:4px;margin:28px 0 16px}
+.sechead h2{font-size:clamp(1.5rem,4vw,2rem)}
+.sechead p{color:var(--muted);max-width:60ch}
+.say{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:2px solid var(--line)}
+.say:first-child{border-top:0}
+.say .txt{flex:1;min-width:0}
+.say b{display:block;font-size:1.05rem}
+.say small{color:var(--muted)}
+.vocab{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:16px;margin-top:16px}
+.vocab h3{font-size:1.1rem;margin-bottom:6px}
+
+/* dictation */
+.dict{display:grid;gap:16px;justify-items:start}
+.dict .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.slot{min-height:64px;width:100%;border-block:2px solid var(--line);padding:10px 0;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.tile{background:var(--surface);border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:8px 14px;font-weight:800;cursor:pointer}
+.tile.used{visibility:hidden}
+.bank{display:flex;flex-wrap:wrap;gap:8px;min-height:48px}
+.verdict{font-weight:800;padding:10px 14px;border-radius:12px;width:100%}
+.verdict.ok{background:var(--good-soft);color:var(--good)}
+.verdict.no{background:var(--bad-soft);color:var(--bad)}
+.counter{color:var(--muted);font-weight:800;font-variant-numeric:tabular-nums}
+
+/* profile */
+.profile{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+.avatar{width:96px;height:96px;border-radius:50%;background:var(--sun);color:var(--sun-ink);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:2.6rem;border-bottom:5px solid var(--sun-deep)}
+.profile h2{font-size:1.8rem}
+.tagline{color:var(--accent);font-weight:800;margin-top:2px}
+.bio{margin-top:12px;max-width:62ch}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding:0;list-style:none}
+.facts li{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 12px;font-weight:800;font-size:.9rem}
+.intro-en{margin-top:16px;display:flex;gap:12px;align-items:center;background:var(--bg);border:2px dashed var(--line);border-radius:16px;padding:12px 14px}
+.intro-en p{flex:1;min-width:0;font-style:italic}
+.links{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:12px;margin-top:20px}
+.link{display:flex;align-items:center;gap:12px;background:var(--surface);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px 14px;text-decoration:none;color:var(--fg);font-weight:800;min-width:0}
+.link i{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-style:normal;font-weight:800;color:var(--on-accent);background:var(--accent);flex:none}
+.link.empty{color:var(--muted);border-style:dashed;cursor:pointer;background:transparent;font:inherit;font-weight:800;text-align:left}
+.link.empty i{background:var(--line);color:var(--muted)}
+.link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+form.edit{display:grid;gap:14px;margin-top:8px}
+form.edit label{display:grid;gap:4px;font-weight:800;font-size:.9rem}
+form.edit input,form.edit textarea{font:inherit;font-weight:500;color:var(--fg);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+form.edit .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
+form.edit .acts{display:flex;gap:10px;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:.85rem;font-weight:500}
+.foot{margin-top:40px;color:var(--muted);font-size:.9rem;text-align:center}
+
+/* player */
+#player{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top,0px)}
+.ptop{display:flex;align-items:center;gap:14px;padding:14px max(16px,env(safe-area-inset-left,0px)) 6px max(16px,env(safe-area-inset-left,0px));max-width:760px;width:100%;margin:0 auto}
+.x{background:none;border:0;font-size:1.6rem;cursor:pointer;color:var(--muted);width:40px;height:40px;border-radius:50%;line-height:1}
+.bar{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good);border-radius:999px;transition:width .3s}
+.hearts{display:flex;align-items:center;gap:4px;font-weight:800;color:var(--bad);font-variant-numeric:tabular-nums}
+.hearts svg{width:24px;height:24px}
+.pmain{flex:1;overflow:auto;padding:16px max(16px,env(safe-area-inset-left,0px));max-width:760px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:20px;justify-content:center}
+.pmain h2{font-size:clamp(1.4rem,4.5vw,1.9rem)}
+.qrow{display:flex;gap:14px;align-items:center}
+.opts{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.opt{background:var(--surface);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:14px 16px;font-weight:800;font-size:1.05rem;text-align:left;cursor:pointer}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.typebox{font:inherit;font-size:1.2rem;font-weight:700;width:100%;padding:14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--fg)}
+.pfoot{border-top:2px solid var(--line);background:var(--surface);padding:14px max(16px,env(safe-area-inset-left,0px)) calc(14px + env(safe-area-inset-bottom,0px))}
+.pfoot.right{background:var(--good-soft);border-color:var(--good-soft)}
+.pfoot.wrong{background:var(--bad-soft);border-color:var(--bad-soft)}
+.pfoot .in{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.pfoot .msg{font-weight:800;min-width:0;flex:1}
+.pfoot.right .msg{color:var(--good)}
+.pfoot.wrong .msg{color:var(--bad)}
+.pfoot .msg small{display:block;font-weight:700}
+.pfoot .btn{min-width:160px}
+.endcard{text-align:center;display:grid;gap:14px;justify-items:center}
+.endcard .big{font-family:var(--font-display);font-size:3rem;font-weight:700;color:var(--accent)}
+.endstats{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;z-index:90;max-width:90vw}
+
+/* accounts, roles, faq, teacher panel */
+.who{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.who .av{width:36px;height:36px;border-radius:50%;background:var(--sun);color:var(--sun-ink);display:grid;place-items:center;font-family:var(--font-display);font-weight:700}
+.who .nm{font-weight:800;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800;letter-spacing:.03em;background:var(--accent-soft);color:var(--accent)}
+.badge.teacher{background:var(--sun);color:var(--sun-ink)}
+.authcard{max-width:520px;margin:28px auto 0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);border-radius:14px;padding:4px;margin-bottom:16px}
+.seg button{border:0;background:none;border-radius:11px;padding:10px;font-weight:800;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 0 var(--line)}
+.roles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.roles label{cursor:pointer;position:relative}
+.roles input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.roles span{display:block;border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:12px;font-weight:800;text-align:center}
+.roles small{display:block;color:var(--muted);font-weight:600}
+.roles input:checked+span{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.roles input:focus-visible+span{outline:3px solid var(--sun);outline-offset:2px}
+.formerr{background:var(--bad-soft);color:var(--bad);border-radius:12px;padding:10px 14px;font-weight:700}
+.formnote{background:var(--accent-soft);color:var(--fg);border-radius:12px;padding:10px 14px;font-size:.9rem}
+.gate{text-align:center;display:grid;gap:12px;justify-items:center;padding:24px 20px}
+.gate .acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tablewrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);font-variant-numeric:tabular-nums}
+th{font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.faq details{border-bottom:2px solid var(--line)}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;font-weight:800;padding:14px 0;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--accent);font-size:1.4rem;line-height:1;flex:none}
+.faq details[open] summary::after{content:"\2212"}
+.faq p{padding:0 0 14px;color:var(--muted);max-width:62ch}
+@media (max-width:520px){
+  .profile{grid-template-columns:1fr}
+  .avatar{width:80px;height:80px;font-size:2.2rem}
+  .pfoot .btn{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="12" fill="var(--accent)"/><rect x="9" y="16" width="4" height="8" rx="2" fill="var(--on-accent)"/><rect x="16" y="11" width="4" height="18" rx="2" fill="var(--on-accent)"/><rect x="23" y="14" width="4" height="12" rx="2" fill="var(--sun)"/><rect x="30" y="18" width="3" height="4" rx="1.5" fill="var(--sun)"/></svg>
+      <span>Learning AI</span>
+    </div>
+    <div class="who" id="who"></div>
+    <div class="stats" aria-label="Natijalaringiz">
+      <span class="chip" title="Ketma-ket kunlar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4-3 5-3 9 0 1.5.7 2.5 1.6 3C10 12 12 11 12 9c3 2 5 4.500 5 7.500A5 5 0 0 1 7 16.500C7 12 12 10 12 2Z" fill="var(--sun)" stroke="var(--sun-deep)" stroke-width="1.500"/></svg><span id="st-streak">0</span> kun</span>
+      <span class="chip" title="Ball"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.700 5.600 6.100.8-4.500 4.300 1.100 6.100L12 16.800 6.600 19.800l1.100-6.100L3.200 9.400l6.100-.8L12 3Z" fill="var(--accent)"/></svg><span id="st-xp">0</span> XP</span>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" aria-label="Bo‘limlar">
+  </nav>
+
+  <main id="view"></main>
+
+  <p class="foot">Learning AI · ingliz tilini oʻzbek tilida, har kuni oz-ozdan oʻrganing.</p>
+</div>
+
+<div id="player" hidden role="dialog" aria-modal="true" aria-label="Dars"></div>
+
+<script>
+/* ---------- SOZLAMALAR: havolalaringizni shu yerga yozing ---------- */
+var CONFIG = {
+  name: "Ismingiz",
+  tagline: "Ingliz tilini oʻrganuvchi",
+  bio: "Salom! Men Learning AI orqali ingliz tilini oʻrganyapman. Maqsadim: har kuni 15 daqiqa mashq qilib, bir yilda erkin gaplasha olish.",
+  city: "Toshkent",
+  goal: "Kuniga 15 daqiqa",
+  introEn: "Hello! My name is Ali. I am from Tashkent. I am learning English every day.",
+  links: { telegram: "", instagram: "", youtube: "", website: "" }
+};
+
+/* ---------- Yordamchilar ---------- */
+var $ = function(s){ return document.querySelector(s); };
+var store = {
+  get: function(k, d){ try { var v = localStorage.getItem("lai:" + k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+  set: function(k, v){ try { localStorage.setItem("lai:" + k, JSON.stringify(v)); } catch(e){} }
+};
+store.ok = (function(){ try { localStorage.setItem("lai:t", "1"); localStorage.removeItem("lai:t"); return true; } catch(e){ return false; } })();
+function shuffle(a){ a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function norm(s){ return String(s).toLowerCase().replace(/[.,!?;:"]/g, "").replace(/\s+/g, " ").trim(); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function today(d){ return (d || new Date()).toLocaleDateString("en-CA"); }
+function toast(msg){ var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 2600); }
+
+var ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="currentColor"/><path d="M16 8.500a5 5 0 0 1 0 7M18.500 6a8.500 8.500 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+var ICON_SLOW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-4.400 0-8 2.700-8 6.500 0 2 1 3.700 2.500 4.800L5 20l4.500-2.200c.8.200 1.600.2 2.500.2 4.400 0 8-2.700 8-6.500S16.400 5 12 5Z" fill="currentColor"/></svg>';
+var ICON_HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.200-8-11a4.500 4.500 0 0 1 8-2.800A4.500 4.500 0 0 1 20 10c0 5.800-8 11-8 11Z" fill="currentColor"/></svg>';
+
+/* ---------- Ovoz (brauzerning oʻz ovozi) ---------- */
+var voices = [];
+function loadVoices(){ try { voices = speechSynthesis.getVoices(); } catch(e){} }
+try { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; } catch(e){}
+function say(text, slow){
+  if (!("speechSynthesis" in window)) { toast("Bu qurilmada ovoz qoʻllab-quvvatlanmaydi."); return false; }
+  try {
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; u.rate = slow ? 0.55 : 0.9;
+    var v = null;
+    for (var i = 0; i < voices.length; i++) { if (/^en[-_]US/i.test(voices[i].lang)) { v = voices[i]; break; } }
+    if (!v) { for (var k = 0; k < voices.length; k++) { if (/^en/i.test(voices[k].lang)) { v = voices[k]; break; } } }
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+    return true;
+  } catch(e){ toast("Ovozni ijro etib boʻlmadi."); return false; }
+}
+
+/* ---------- Darslar maʼlumoti ---------- */
+var UNITS = [
+  { id: "salom", title: "Salomlashish", words: [
+    ["Hello","Salom"],["Goodbye","Xayr"],["Please","Iltimos"],["Thank you","Rahmat"],
+    ["Sorry","Kechirasiz"],["Yes","Ha"],["No","Yoʻq"],["Good morning","Xayrli tong"] ] },
+  { id: "oila", title: "Oila va doʻstlar", words: [
+    ["Mother","Ona"],["Father","Ota"],["Brother","Aka-uka"],["Sister","Opa-singil"],
+    ["Friend","Doʻst"],["Family","Oila"],["Child","Bola"],["Teacher","Oʻqituvchi"] ] },
+  { id: "ovqat", title: "Oziq-ovqat", words: [
+    ["Bread","Non"],["Water","Suv"],["Apple","Olma"],["Rice","Guruch"],
+    ["Milk","Sut"],["Tea","Choy"],["Meat","Goʻsht"],["Egg","Tuxum"] ] },
+  { id: "raqam", title: "Raqamlar", words: [
+    ["One","Bir"],["Two","Ikki"],["Three","Uch"],["Four","Toʻrt"],
+    ["Five","Besh"],["Six","Olti"],["Seven","Yetti"],["Ten","Oʻn"] ] }
+];
+var SENTENCES = [
+  ["My name is Ali", "Mening ismim Ali"],
+  ["How are you today", "Bugun ahvolingiz qanday"],
+  ["I like green tea", "Menga yashil choy yoqadi"],
+  ["She is my sister", "U mening singlim"],
+  ["Thank you very much", "Katta rahmat"],
+  ["I want some water", "Men biroz suv istayman"],
+  ["Where is the bank", "Bank qayerda"],
+  ["See you tomorrow", "Ertagacha koʻrishguncha"]
+];
+var EXTRA_WORDS = ["very", "now", "the", "we", "is", "and"];
+
+/* ---------- Holat ---------- */
+/* Hisoblar faqat shu brauzerda saqlanadi (serverga hech narsa yuborilmaydi) */
+var ME = null, UID = "guest", S = { xp: 0, streak: 0, last: "", done: {} }, prof = JSON.parse(JSON.stringify(CONFIG));
+function accounts(){ return store.get("accounts", []); }
+function uk(uid, k){ return "u:" + uid + ":" + k; }
+function readProgress(uid){
+  return { xp: store.get(uk(uid, "xp"), 0), streak: store.get(uk(uid, "streak"), 0), last: store.get(uk(uid, "last"), ""), done: store.get(uk(uid, "done"), {}) };
+}
+function loadUser(){
+  var sid = store.get("session", null), list = accounts();
+  ME = null;
+  for (var i = 0; i < list.length; i++) { if (list[i].id === sid) ME = list[i]; }
+  UID = ME ? ME.id : "guest";
+  S = readProgress(UID);
+  var def = JSON.parse(JSON.stringify(CONFIG));
+  if (ME) { def.name = ME.name; def.tagline = ME.role === "teacher" ? "Oʻqituvchi" : "Oʻquvchi"; }
+  prof = store.get(uk(UID, "profile"), null) || def;
+  streakCheck();
+}
+function saveS(){ store.set(uk(UID, "xp"), S.xp); store.set(uk(UID, "streak"), S.streak); store.set(uk(UID, "last"), S.last); store.set(uk(UID, "done"), S.done); }
+function paintStats(){ $("#st-xp").textContent = S.xp; $("#st-streak").textContent = S.streak; }
+function streakCheck(){
+  var y = new Date(); y.setDate(y.getDate() - 1);
+  if (S.last && S.last !== today() && S.last !== today(y)) { S.streak = 0; }
+}
+
+/* ---------- Boʻlimlar ---------- */
+var TAB_DEFS = [["darslar", "Darslar"], ["audio", "Audio mashq"], ["faq", "Savol-javob"], ["men", "Men haqimda"]];
+var authMode = "login", authMsg = "";
+function tabsNow(){ var t = TAB_DEFS.slice(); if (ME && ME.role === "teacher") t.splice(3, 0, ["panel", "Oʻqituvchi paneli"]); return t; }
+function mk(tag, cls, txt){ var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+function renderTabs(){
+  var nav = $("#tabs"); nav.innerHTML = "";
+  tabsNow().forEach(function(t){ var b = mk("button", "tab", t[1]); b.setAttribute("data-tab", t[0]); nav.appendChild(b); });
+}
+function renderWho(){
+  var w = $("#who"); w.innerHTML = "";
+  if (ME) {
+    w.appendChild(mk("span", "av", ME.name.charAt(0).toUpperCase()));
+    w.appendChild(mk("span", "nm", ME.name));
+    w.appendChild(mk("span", "badge" + (ME.role === "teacher" ? " teacher" : ""), ME.role === "teacher" ? "Oʻqituvchi" : "Oʻquvchi"));
+    var o = mk("button", "btn ghost sm", "Chiqish"); o.setAttribute("data-who", "out"); w.appendChild(o);
+  } else {
+    var a = mk("button", "btn ghost sm", "Kirish"); a.setAttribute("data-who", "login"); w.appendChild(a);
+    var b = mk("button", "btn sm", "Roʻyxatdan oʻtish"); b.setAttribute("data-who", "signup"); w.appendChild(b);
+  }
+}
+function go(h){ if (location.hash === "#" + h) route(); else location.hash = h; }
+function openAuth(mode, msg){ authMode = mode === "signup" ? "signup" : "login"; authMsg = msg || ""; go("kirish"); }
+function afterAuthChange(){ renderTabs(); renderWho(); paintStats(); }
+function guestBanner(){
+  if (ME) return;
+  var v = $("#view"), u = v.querySelector(".units"); if (!u) return;
+  var g = mk("div", "panel gate");
+  g.style.marginTop = "20px";
+  g.innerHTML = '<h3>Darslarni boshlash uchun hisob oching</h3><p class="hint">Oʻquvchi yoki oʻqituvchi sifatida roʻyxatdan oʻting. Natijalaringiz hisobingizda saqlanadi.</p><div class="acts"><button class="btn" data-go="signup">Roʻyxatdan oʻtish</button><button class="btn ghost" data-go="login">Kirish</button></div>';
+  v.insertBefore(g, u);
+}
+function viewGate(v, title){
+  v.innerHTML = '<div class="sechead"><h2>' + esc(title) + '</h2></div><div class="panel gate"><h3>Davom etish uchun hisobga kiring</h3><p class="hint">Natijalaringiz (XP, ketma-ket kunlar) hisobingizda saqlanadi.</p><div class="acts"><button class="btn" data-go="login">Kirish</button><button class="btn ghost" data-go="signup">Roʻyxatdan oʻtish</button></div></div>';
+}
+function route(){
+  var h = (location.hash || "").replace("#", "");
+  var names = tabsNow().map(function(t){ return t[0]; });
+  if (h === "kirish" && ME) h = "darslar";
+  if (names.indexOf(h) < 0 && h !== "kirish") h = "darslar";
+  document.querySelectorAll(".tab").forEach(function(b){
+    if (b.getAttribute("data-tab") === h) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  if (h === "darslar") { viewHome(); guestBanner(); }
+  else if (h === "audio") viewAudio();
+  else if (h === "faq") viewFaq();
+  else if (h === "panel") viewPanel();
+  else if (h === "kirish") viewAuth();
+  else viewProfile();
+}
+$("#tabs").addEventListener("click", function(e){
+  var b = e.target.closest("[data-tab]"); if (!b) return;
+  go(b.getAttribute("data-tab"));
+});
+$("#who").addEventListener("click", function(e){
+  var b = e.target.closest("[data-who]"); if (!b) return;
+  var a = b.getAttribute("data-who");
+  if (a === "out") { store.set("session", null); loadUser(); afterAuthChange(); go("darslar"); toast("Hisobdan chiqdingiz"); }
+  else openAuth(a);
+});
+window.addEventListener("hashchange", route);
+
+/* ---------- Darslar sahifasi ---------- */
+function viewHome(){
+  var v = $("#view");
+  var html = '<div class="hero"><h1>Bugun nimani oʻrganamiz?</h1><p>Har bir dars 10 ta mashqdan iborat: tarjima, tinglab tanlash va tinglab yozish. Xato qilsangiz yurak ketadi, lekin mashq oxirida qayta beriladi.</p></div><ul class="units">';
+  UNITS.forEach(function(u, i){
+    var n = S.done[u.id] || 0, p = Math.min(n, 3) / 3 * 100;
+    html += '<li class="unit"><div class="ring" style="--p:' + p + '"><span>' + (i + 1) + '</span></div><div><h3>' + esc(u.title) + '</h3><p class="meta">' + u.words.length + ' ta soʻz · ' + (n ? n + " marta bajarildi" : "hali boshlanmagan") + '</p><button class="btn sm" data-start="' + i + '">' + (n ? "Qayta" : "Boshlash") + '</button></div></li>';
+  });
+  html += '</ul><div class="sechead"><h2>Soʻzlar lugʻati</h2><p>Soʻzni bosing, talaffuzini eshiting va ovoz chiqarib takrorlang.</p></div><div class="vocab">';
+  UNITS.forEach(function(u){
+    html += '<div class="panel"><h3>' + esc(u.title) + '</h3>';
+    u.words.forEach(function(w){
+      html += '<div class="say"><button class="btn ghost iconbtn" data-say="' + esc(w[0]) + '" aria-label="' + esc(w[0]) + ' soʻzini tinglash">' + ICON_PLAY + '</button><div class="txt"><b>' + esc(w[0]) + '</b><small>' + esc(w[1]) + '</small></div></div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  v.innerHTML = html;
+}
+$("#view").addEventListener("click", function(e){
+  var s = e.target.closest("[data-say]"); if (s) { say(s.getAttribute("data-say")); return; }
+  var b = e.target.closest("[data-start]");
+  if (b) {
+    if (!ME) { openAuth("login", "Darsni boshlash uchun avval hisobingizga kiring yoki roʻyxatdan oʻting."); return; }
+    startLesson(UNITS[+b.getAttribute("data-start")]);
+  }
+});
+
+/* ---------- Dars oynasi ---------- */
+var P = null;
+function mkChoose(w, u, enToUz){
+  var others = shuffle(u.words.filter(function(x){ return x !== w; })).slice(0, 3);
+  var all = shuffle([w].concat(others));
+  var qi = enToUz ? 0 : 1, ai = enToUz ? 1 : 0;
+  return { type: "choose", q: enToUz ? "“" + w[0] + "” qanday tarjima qilinadi?" : "“" + w[1] + "” inglizcha qanday?",
+    options: all.map(function(x){ return x[ai]; }), answer: w[ai], say: enToUz ? w[0] : null, hint: w[qi] };
+}
+function mkListen(w, u){
+  var others = shuffle(u.words.filter(function(x){ return x !== w; })).slice(0, 3);
+  return { type: "listen", q: "Eshiting va toʻgʻri soʻzni tanlang", options: shuffle([w].concat(others)).map(function(x){ return x[0]; }), answer: w[0], audio: w[0], hint: w[1] };
+}
+function mkType(w){ return { type: "type", q: "Eshitganingizni inglizcha yozing", answer: w[0], audio: w[0], hint: w[1] }; }
+
+function startLesson(u){
+  var w = shuffle(u.words), q = [];
+  w.slice(0, 4).forEach(function(x, i){ q.push(mkChoose(x, u, i % 2 === 0)); });
+  w.slice(4, 7).forEach(function(x){ q.push(mkListen(x, u)); });
+  [w[5], w[6], w[7]].forEach(function(x){ q.push(mkType(x)); });
+  P = { u: u, q: q, total: q.length, i: 0, hearts: 5, correct: 0, wrong: 0, st: "ask", sel: null, typed: "" };
+  renderPlayer(true);
+}
+function curEx(){ return P.q[P.i]; }
+
+function renderPlayer(autoplay){
+  var el = $("#player"); el.hidden = false; document.body.style.overflow = "hidden";
+  var pct = P.st === "end" ? 100 : Math.round(P.correct / P.total * 100);
+  var head = '<div class="ptop"><button class="x" data-act="close" aria-label="Darsni yopish">×</button><div class="bar" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + pct + '%"></i></div><div class="hearts" aria-label="Yuraklar">' + ICON_HEART + '<span>' + P.hearts + '</span></div></div>';
+
+  if (P.st === "end" || P.st === "dead") {
+    var dead = P.st === "dead", acc = Math.round(P.total / (P.total + P.wrong) * 100);
+    el.innerHTML = head + '<div class="pmain"><div class="endcard"><div class="big">' + (dead ? "Yuraklar tugadi" : "Dars tugadi!") + '</div><p>' + (dead ? "Hechqisi yoʻq, qayta urinib koʻring. Takrorlash eng yaxshi usul." : "Ajoyib ish. Natijangiz saqlandi.") + '</p>' +
+      (dead ? "" : '<div class="endstats"><span class="chip">+' + P.gain + ' XP</span><span class="chip">Aniqlik ' + acc + '%</span></div>') +
+      '</div></div><div class="pfoot"><div class="in"><span></span><button class="btn" data-act="' + (dead ? "retry" : "close") + '">' + (dead ? "Qayta boshlash" : "Davom etish") + '</button></div></div>';
+    return;
+  }
+
+  var ex = curEx(), checked = P.st !== "ask", body = '<h2>' + esc(ex.q) + '</h2>';
+  if (ex.type === "choose") {
+    if (ex.say) body += '<div class="qrow"><button class="btn ghost iconbtn" data-act="play" aria-label="Tinglash">' + ICON_PLAY + '</button></div>';
+  } else {
+    body += '<div class="qrow"><button class="btn iconbtn" data-act="play" aria-label="Tinglash">' + ICON_PLAY + '</button><button class="btn ghost iconbtn" data-act="slow" aria-label="Sekin tinglash">' + ICON_SLOW + '</button><span class="hint">Ikkinchi tugma: sekin ijro</span></div>';
+  }
+  if (ex.type === "type") {
+    body += '<input id="ans" class="typebox" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Inglizcha yozing" value="' + esc(P.typed) + '"' + (checked ? " disabled" : "") + '>';
+  } else {
+    body += '<div class="opts">';
+    ex.options.forEach(function(o, i){
+      var cls = "opt";
+      if (checked) { if (o === ex.answer) cls += " right"; else if (P.sel === i) cls += " wrong"; }
+      body += '<button class="' + cls + '" data-opt="' + i + '" aria-pressed="' + (P.sel === i) + '"' + (checked ? " disabled" : "") + '>' + esc(o) + '</button>';
+    });
+    body += '</div>';
+  }
+
+  var foot;
+  if (!checked) {
+    foot = '<div class="pfoot"><div class="in"><span></span><button class="btn" id="chk" data-act="check" disabled>Tekshirish</button></div></div>';
+  } else {
+    var ok = P.st === "right";
+    foot = '<div class="pfoot ' + P.st + '"><div class="in"><div class="msg">' + (ok ? "Toʻgʻri!" : "Notoʻgʻri") + (ok ? "" : '<small>Toʻgʻri javob: ' + esc(ex.answer) + '</small>') + '<small>' + esc(ex.type === "choose" ? "" : ex.hint) + '</small></div><button class="btn ' + (ok ? "good" : "bad") + '" data-act="next">Davom etish</button></div></div>';
+  }
+  el.innerHTML = head + '<div class="pmain">' + body + '</div>' + foot;
+  refreshCheck();
+  if (autoplay && ex.audio) say(ex.audio);
+  if (autoplay && ex.say) say(ex.say);
+  var inp = $("#ans"); if (inp && !checked) inp.focus();
+}
+function refreshCheck(){
+  var c = $("#chk"); if (!c) return;
+  var ex = curEx();
+  c.disabled = ex.type === "type" ? !($("#ans").value.trim()) : P.sel === null;
+}
+function doCheck(){
+  var ex = curEx(), ok;
+  if (ex.type === "type") { P.typed = $("#ans").value; ok = norm(P.typed) === norm(ex.answer); }
+  else ok = P.sel !== null && ex.options[P.sel] === ex.answer;
+  P.st = ok ? "right" : "wrong";
+  if (ok) P.correct++; else { P.hearts--; P.wrong++; P.q.push(ex); }
+  renderPlayer(false);
+}
+function doNext(){
+  if (P.hearts <= 0) { P.st = "dead"; renderPlayer(false); return; }
+  P.i++; P.st = "ask"; P.sel = null; P.typed = "";
+  if (P.i >= P.q.length) { finishLesson(); return; }
+  renderPlayer(true);
+}
+function finishLesson(){
+  P.gain = P.correct * 10 + (P.wrong === 0 ? 10 : 0);
+  S.xp += P.gain;
+  S.done[P.u.id] = (S.done[P.u.id] || 0) + 1;
+  var t = today();
+  if (S.last !== t) {
+    var y = new Date(); y.setDate(y.getDate() - 1);
+    S.streak = S.last === today(y) ? S.streak + 1 : 1;
+    S.last = t;
+  }
+  saveS(); paintStats();
+  P.st = "end"; renderPlayer(false);
+}
+function closePlayer(){
+  try { speechSynthesis.cancel(); } catch(e){}
+  $("#player").hidden = true; document.body.style.overflow = ""; P = null; route();
+}
+$("#player").addEventListener("click", function(e){
+  var a = e.target.closest("[data-act]"), o = e.target.closest("[data-opt]");
+  if (o && P && P.st === "ask") { P.sel = +o.getAttribute("data-opt"); document.querySelectorAll(".opt").forEach(function(b){ b.setAttribute("aria-pressed", String(+b.getAttribute("data-opt") === P.sel)); }); refreshCheck(); return; }
+  if (!a) return;
+  var act = a.getAttribute("data-act");
+  if (act === "close") closePlayer();
+  else if (act === "retry") startLesson(P.u);
+  else if (act === "play") { var ex = curEx(); say(ex.audio || ex.say); }
+  else if (act === "slow") { say(curEx().audio, true); }
+  else if (act === "check") doCheck();
+  else if (act === "next") doNext();
+});
+$("#player").addEventListener("input", function(e){ if (e.target.id === "ans") refreshCheck(); });
+$("#player").addEventListener("keydown", function(e){
+  if (e.key !== "Enter" || !P) return;
+  if (P.st === "ask") { var c = $("#chk"); if (c && !c.disabled) doCheck(); }
+  else if (P.st === "right" || P.st === "wrong") doNext();
+});
+
+/* ---------- Audio mashq ---------- */
+var A = { i: 0, bank: [], picked: [], result: null };
+function setupSentence(){
+  var s = SENTENCES[A.i][0].split(" ");
+  var extra = shuffle(EXTRA_WORDS.filter(function(w){ return s.map(function(x){ return x.toLowerCase(); }).indexOf(w) < 0; })).slice(0, 2);
+  A.bank = shuffle(s.concat(extra)).map(function(w, k){ return { id: k, w: w }; });
+  A.picked = []; A.result = null;
+}
+function viewAudio(){
+  var v = $("#view");
+  if (!ME) { viewGate(v, "Audio mashq"); return; }
+  if (!A.bank.length) setupSentence();
+  var s = SENTENCES[A.i];
+  var html = '<div class="sechead"><h2>Audio mashq</h2><p>Gapni eshiting va eshitgan soʻzlaringizni tartib bilan terib chiqing. Kerak boʻlsa sekin ijroni bosing.</p></div><div class="panel dict">' +
+    '<div class="row"><span class="counter">' + (A.i + 1) + ' / ' + SENTENCES.length + '</span><button class="btn iconbtn" data-a="play" aria-label="Gapni tinglash">' + ICON_PLAY + '</button><button class="btn ghost iconbtn" data-a="slow" aria-label="Sekin tinglash">' + ICON_SLOW + '</button></div>' +
+    '<p class="hint">Tarjimasi: ' + esc(s[1]) + '</p><div class="slot" id="slot" aria-label="Javobingiz"></div><div class="bank" id="bank"></div>' +
+    '<div id="verdict" style="width:100%"></div><div class="row"><button class="btn" data-a="check">Tekshirish</button><button class="btn ghost" data-a="next">Keyingi gap</button></div></div>';
+  v.innerHTML = html;
+  paintTiles();
+  paintVerdict();
+}
+function paintTiles(){
+  var slot = $("#slot"), bank = $("#bank"); if (!slot) return;
+  slot.innerHTML = ""; bank.innerHTML = "";
+  A.picked.forEach(function(t){
+    var b = document.createElement("button"); b.className = "tile"; b.textContent = t.w; b.setAttribute("data-pick", t.id); slot.appendChild(b);
+  });
+  A.bank.forEach(function(t){
+    var used = A.picked.some(function(p){ return p.id === t.id; });
+    var b = document.createElement("button"); b.className = "tile" + (used ? " used" : ""); b.textContent = t.w; b.setAttribute("data-bank", t.id); if (used) b.disabled = true; bank.appendChild(b);
+  });
+}
+function paintVerdict(){
+  var el = $("#verdict"); if (!el) return;
+  if (!A.result) { el.innerHTML = ""; return; }
+  el.innerHTML = A.result === "ok" ? '<div class="verdict ok">Toʻgʻri! +5 XP</div>' : '<div class="verdict no">Hali toʻgʻri emas. Qayta tinglab koʻring.</div>';
+}
+$("#view").addEventListener("click", function(e){
+  var t = e.target.closest("[data-bank],[data-pick],[data-a]"); if (!t || !$("#slot")) return;
+  if (t.hasAttribute("data-bank")) {
+    var id = +t.getAttribute("data-bank");
+    A.picked.push(A.bank.filter(function(x){ return x.id === id; })[0]); A.result = null; paintTiles(); paintVerdict();
+  } else if (t.hasAttribute("data-pick")) {
+    var pid = +t.getAttribute("data-pick");
+    A.picked = A.picked.filter(function(x){ return x.id !== pid; }); A.result = null; paintTiles(); paintVerdict();
+  } else {
+    var a = t.getAttribute("data-a"), s = SENTENCES[A.i][0];
+    if (a === "play") say(s); else if (a === "slow") say(s, true);
+    else if (a === "check") {
+      var ok = norm(A.picked.map(function(x){ return x.w; }).join(" ")) === norm(s);
+      if (ok && A.result !== "ok") { S.xp += 5; saveS(); paintStats(); }
+      A.result = ok ? "ok" : "no"; paintVerdict();
+    } else if (a === "next") { A.i = (A.i + 1) % SENTENCES.length; setupSentence(); viewAudio(); say(SENTENCES[A.i][0]); }
+  }
+});
+
+/* ---------- Men haqimda ---------- */
+var LINK_KINDS = [
+  ["telegram", "Telegram", "T"], ["instagram", "Instagram", "I"], ["youtube", "YouTube", "Y"], ["website", "Veb-sayt", "W"]
+];
+function normLink(kind, v){
+  v = (v || "").trim(); if (!v) return "";
+  if (kind === "telegram" && /^@?[A-Za-z0-9_]{4,}$/.test(v)) return "https://t.me/" + v.replace("@", "");
+  if (kind === "instagram" && /^@?[A-Za-z0-9_.]{2,}$/.test(v)) return "https://instagram.com/" + v.replace("@", "");
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(v)) return "https://" + v;
+  return "";
+}
+var editing = false;
+function viewProfile(){
+  var v = $("#view");
+  if (editing) { renderForm(v); return; }
+  var wrap = document.createElement("div");
+  wrap.innerHTML = '<div class="sechead"><h2>Men haqimda</h2><p>Oʻrganuvchi sifatida oʻzimni tanishtiraman va ijtimoiy tarmoqlarimga havolalar shu yerda.</p></div>' +
+    '<div class="panel"><div class="profile"><div class="avatar" id="p-av"></div><div><h2 id="p-name"></h2><p class="tagline" id="p-tag"></p><p class="bio" id="p-bio"></p><ul class="facts" id="p-facts"></ul></div></div>' +
+    '<div class="intro-en"><button class="btn ghost iconbtn" id="p-play" aria-label="Inglizcha tanishuvni tinglash">' + ICON_PLAY + '</button><p id="p-en"></p></div>' +
+    '<div class="links" id="p-links"></div><div style="margin-top:20px"><button class="btn ghost sm" id="p-edit">Tahrirlash</button></div></div>';
+  v.innerHTML = ""; v.appendChild(wrap);
+  $("#p-av").textContent = (prof.name || "?").trim().charAt(0).toUpperCase();
+  $("#p-name").textContent = prof.name; $("#p-tag").textContent = prof.tagline; $("#p-bio").textContent = prof.bio;
+  var facts = $("#p-facts");
+  [["Shahar", prof.city], ["Kunlik maqsad", prof.goal]].forEach(function(f){
+    if (!f[1]) return; var li = document.createElement("li"); li.textContent = f[0] + ": " + f[1]; facts.appendChild(li);
+  });
+  $("#p-en").textContent = prof.introEn;
+  $("#p-play").addEventListener("click", function(){ say(prof.introEn); });
+  $("#p-edit").addEventListener("click", function(){ editing = true; viewProfile(); });
+  var box = $("#p-links");
+  LINK_KINDS.forEach(function(k){
+    var url = normLink(k[0], prof.links[k[0]]);
+    var el;
+    if (url) { el = document.createElement("a"); el.href = url; el.target = "_blank"; el.rel = "noopener noreferrer"; }
+    else { el = document.createElement("button"); el.className = "link empty"; el.addEventListener("click", function(){ editing = true; viewProfile(); }); }
+    el.classList.add("link");
+    var ic = document.createElement("i"); ic.textContent = k[2];
+    var tx = document.createElement("span"); tx.textContent = url ? k[1] : k[1] + " qoʻshish";
+    el.appendChild(ic); el.appendChild(tx); box.appendChild(el);
+  });
+}
+function renderForm(v){
+  v.innerHTML = '<div class="sechead"><h2>Profilni tahrirlash</h2><p>Maʼlumotlar shu brauzerda saqlanadi.</p></div><div class="panel"><form class="edit" id="pf">' +
+    '<div class="two"><label for="f-name">Ism<input id="f-name" maxlength="40"></label><label for="f-tag">Qisqa taʼrif<input id="f-tag" maxlength="60"></label></div>' +
+    '<div class="two"><label for="f-city">Shahar<input id="f-city" maxlength="40"></label><label for="f-goal">Kunlik maqsad<input id="f-goal" maxlength="40"></label></div>' +
+    '<label for="f-bio">Oʻzim haqimda<textarea id="f-bio" rows="4" maxlength="400"></textarea></label>' +
+    '<label for="f-en">Inglizcha tanishuv<textarea id="f-en" rows="3" maxlength="300"></textarea><span class="hint">Shu matnni eshitib, ovoz chiqarib takrorlash mumkin.</span></label>' +
+    '<div class="two"><label for="f-telegram">Telegram<input id="f-telegram" placeholder="@kanal yoki https://t.me/..."></label><label for="f-instagram">Instagram<input id="f-instagram" placeholder="@nom yoki havola"></label></div>' +
+    '<div class="two"><label for="f-youtube">YouTube<input id="f-youtube" placeholder="https://youtube.com/..."></label><label for="f-website">Veb-sayt<input id="f-website" placeholder="https://..."></label></div>' +
+    '<div class="acts"><button class="btn" type="submit">Saqlash</button><button class="btn ghost" type="button" id="f-cancel">Bekor qilish</button></div></form></div>';
+  $("#f-name").value = prof.name; $("#f-tag").value = prof.tagline; $("#f-city").value = prof.city; $("#f-goal").value = prof.goal;
+  $("#f-bio").value = prof.bio; $("#f-en").value = prof.introEn;
+  LINK_KINDS.forEach(function(k){ $("#f-" + k[0]).value = prof.links[k[0]] || ""; });
+  $("#f-cancel").addEventListener("click", function(){ editing = false; viewProfile(); });
+  $("#pf").addEventListener("submit", function(e){
+    e.preventDefault();
+    prof.name = $("#f-name").value.trim() || "Ismingiz"; prof.tagline = $("#f-tag").value.trim(); prof.city = $("#f-city").value.trim();
+    prof.goal = $("#f-goal").value.trim(); prof.bio = $("#f-bio").value.trim(); prof.introEn = $("#f-en").value.trim();
+    LINK_KINDS.forEach(function(k){ prof.links[k[0]] = $("#f-" + k[0]).value.trim(); });
+    store.set(uk(UID, "profile"), prof); editing = false; viewProfile(); toast("Saqlandi");
+  });
+}
+
+/* ---------- Kirish / Roʻyxatdan oʻtish ---------- */
+function hex(buf){ return Array.prototype.map.call(new Uint8Array(buf), function(b){ return ("0" + b.toString(16)).slice(-2); }).join(""); }
+function unhex(h){ var a = new Uint8Array(h.length / 2); for (var i = 0; i < a.length; i++) a[i] = parseInt(h.substr(i * 2, 2), 16); return a; }
+function hashPw(pw, saltHex){
+  return crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveBits"]).then(function(k){
+    return crypto.subtle.deriveBits({ name: "PBKDF2", salt: unhex(saltHex), iterations: 150000, hash: "SHA-256" }, k, 256);
+  }).then(hex);
+}
+function viewAuth(){
+  var v = $("#view"), su = authMode === "signup";
+  var html = '<div class="authcard panel"><div class="seg" role="group" aria-label="Amal">' +
+    '<button type="button" data-mode="login" aria-pressed="' + (!su) + '">Kirish</button>' +
+    '<button type="button" data-mode="signup" aria-pressed="' + su + '">Roʻyxatdan oʻtish</button></div>';
+  if (authMsg) html += '<p class="formnote" style="margin-bottom:12px">' + esc(authMsg) + '</p>';
+  html += '<form class="edit" id="af" novalidate>';
+  if (su) {
+    html += '<div class="hint" style="font-weight:800">Siz kimsiz?</div><div class="roles" role="radiogroup" aria-label="Rolingiz">' +
+      '<label><input type="radio" name="role" value="student" checked><span>Oʻquvchi<small>Dars olaman</small></span></label>' +
+      '<label><input type="radio" name="role" value="teacher"><span>Oʻqituvchi<small>Natijalarni kuzataman</small></span></label></div>' +
+      '<label for="a-name">Ism<input id="a-name" maxlength="40" autocomplete="name"></label>';
+  }
+  html += '<label for="a-email">Email<input id="a-email" type="email" autocomplete="email" inputmode="email"></label>' +
+    '<label for="a-pass">Parol<input id="a-pass" type="password" autocomplete="' + (su ? "new-password" : "current-password") + '"></label>' +
+    '<p class="formerr" id="aerr" role="alert" hidden></p>' +
+    '<p class="formnote">Hisob faqat shu qurilma va brauzerda saqlanadi. Boshqa saytlarda ishlatadigan parolingizni kiritmang.</p>' +
+    '<button class="btn" type="submit">' + (su ? "Hisob ochish" : "Kirish") + '</button></form></div>';
+  v.innerHTML = html;
+  var f = $(su ? "#a-name" : "#a-email"); if (f) f.focus();
+}
+function fail(m){ var el = $("#aerr"); if (el) { el.textContent = m; el.hidden = false; } }
+function signedIn(acc, msg){
+  store.set("session", acc.id); authMsg = ""; loadUser(); afterAuthChange(); go("darslar"); toast(msg);
+}
+function doAuth(){
+  var er = $("#aerr"); if (er) er.hidden = true;
+  var email = $("#a-email").value.trim().toLowerCase(), pw = $("#a-pass").value, su = authMode === "signup";
+  if (!store.ok) return fail("Brauzer xotirasi yopiq, hisob saqlanmaydi. Shaxsiy (private) boʻlmagan oynada oching.");
+  if (!window.crypto || !crypto.subtle) return fail("Bu brauzerda parolni xavfsiz saqlab boʻlmaydi.");
+  if (!/^\S+@\S+\.\S+$/.test(email)) return fail("Email manzilni toʻgʻri yozing.");
+  if (pw.length < 6) return fail("Parol kamida 6 belgidan iborat boʻlsin.");
+  var list = accounts(), found = null;
+  for (var i = 0; i < list.length; i++) { if (list[i].email === email) found = list[i]; }
+  if (su) {
+    var name = $("#a-name").value.trim();
+    if (!name) return fail("Ismingizni yozing.");
+    if (found) return fail("Bu email bilan hisob bor. Kirish boʻlimiga oʻting.");
+    var chosen = document.querySelector('input[name="role"]:checked');
+    var role = chosen && chosen.value === "teacher" ? "teacher" : "student";
+    var salt = hex(crypto.getRandomValues(new Uint8Array(16)));
+    hashPw(pw, salt).then(function(h){
+      var acc = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), role: role, name: name, email: email, salt: salt, hash: h, created: today() };
+      list.push(acc); store.set("accounts", list);
+      signedIn(acc, "Xush kelibsiz, " + name + "!");
+    }).catch(function(){ fail("Xatolik yuz berdi. Qayta urinib koʻring."); });
+  } else {
+    if (!found) return fail("Email yoki parol notoʻgʻri.");
+    hashPw(pw, found.salt).then(function(h){
+      if (h !== found.hash) { fail("Email yoki parol notoʻgʻri."); return; }
+      signedIn(found, "Qaytganingiz bilan, " + found.name + "!");
+    }).catch(function(){ fail("Xatolik yuz berdi. Qayta urinib koʻring."); });
+  }
+}
+$("#view").addEventListener("click", function(e){
+  var g = e.target.closest("[data-go]"); if (g) { openAuth(g.getAttribute("data-go")); return; }
+  var m = e.target.closest("[data-mode]"); if (m) { authMode = m.getAttribute("data-mode"); authMsg = ""; viewAuth(); }
+});
+$("#view").addEventListener("submit", function(e){ if (e.target.id === "af") { e.preventDefault(); doAuth(); } });
+
+/* ---------- Oʻqituvchi paneli ---------- */
+function viewPanel(){
+  var v = $("#view");
+  if (!ME || ME.role !== "teacher") { v.innerHTML = '<div class="panel gate"><h3>Bu boʻlim oʻqituvchilar uchun</h3><p class="hint">Oʻqituvchi hisobi bilan kiring.</p></div>'; return; }
+  var rows = accounts().filter(function(a){ return a.role === "student"; }).map(function(a){ return { a: a, p: readProgress(a.id) }; })
+    .sort(function(x, y){ return y.p.xp - x.p.xp; });
+  var totalXp = rows.reduce(function(s, r){ return s + r.p.xp; }, 0);
+  v.innerHTML = '<div class="sechead"><h2>Oʻqituvchi paneli</h2><p>Shu qurilmada roʻyxatdan oʻtgan oʻquvchilar va ularning natijalari. Boshqa qurilmalardagi oʻquvchilar bu yerda koʻrinmaydi.</p></div>' +
+    '<div class="panel"><div class="stats"><span class="chip">Oʻquvchilar: ' + rows.length + '</span><span class="chip">Jami: ' + totalXp + ' XP</span></div><div class="tablewrap" id="tw"></div></div>';
+  var tw = $("#tw");
+  if (!rows.length) { tw.appendChild(mk("p", "hint", "Hali oʻquvchi yoʻq. Oʻquvchi shu qurilmada roʻyxatdan oʻtganda, bu yerda paydo boʻladi.")); return; }
+  var t = document.createElement("table");
+  t.innerHTML = "<thead><tr><th>Oʻquvchi</th><th>XP</th><th>Ketma-ket kun</th><th>Darslar</th><th>Oxirgi faollik</th></tr></thead>";
+  var tb = document.createElement("tbody");
+  rows.forEach(function(r){
+    var lessons = 0; for (var k in r.p.done) { lessons += r.p.done[k]; }
+    var tr = document.createElement("tr");
+    [r.a.name, r.p.xp, r.p.streak, lessons, r.p.last || "—"].forEach(function(c){ tr.appendChild(mk("td", "", String(c))); });
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb); tw.appendChild(t);
+}
+
+/* ---------- Savol-javob ---------- */
+var FAQ = [
+  ["Learning AI nima?", "Ingliz tilini oʻzbek tilida oʻrganish uchun mashq sayti: qisqa darslar, tinglash va yozish mashqlari, audio gaplar."],
+  ["Qaysi tilni oʻrganaman?", "Hozircha ingliz tilini. Har bir soʻz oʻzbekcha tarjimasi bilan beriladi."],
+  ["Hisob nima uchun kerak?", "Darslarni boshlash va natijalaringiz (XP, ketma-ket kunlar) hisobingizda saqlanishi uchun. Hisob ochayotganda oʻquvchi yoki oʻqituvchi rolini tanlaysiz."],
+  ["Oʻquvchi va oʻqituvchi hisobi qanday farq qiladi?", "Oʻquvchi darslar va audio mashqlar bilan ishlaydi. Oʻqituvchi qoʻshimcha ravishda “Oʻqituvchi paneli”da oʻquvchilarning XP, ketma-ket kunlari va tugatgan darslarini koʻradi."],
+  ["Natijalarim qayerda saqlanadi?", "Shu qurilma va brauzerda. Boshqa telefon yoki kompyuterdan kirsangiz, natijalar koʻrinmaydi. Brauzer maʼlumotlarini tozalasangiz, hisob ham oʻchadi."],
+  ["Parolim xavfsizmi?", "Parol hash koʻrinishida faqat shu brauzerda saqlanadi va hech qayerga yuborilmaydi. Shunga qaramay, boshqa saytlarda ishlatadigan parolingizni kiritmang. Parolni unutsangiz, tiklab boʻlmaydi: yangi hisob oching."],
+  ["Yurak nima?", "Har darsda 5 ta yurak beriladi. Har xato bittasini oladi, xato qilingan mashq esa dars oxirida qayta beriladi. Yuraklar tugasa, darsni qaytadan boshlaysiz."],
+  ["Audio mashq qanday ishlaydi?", "Gapni eshitasiz va eshitgan soʻzlaringizni tartib bilan terib chiqasiz. Gap tushunarsiz boʻlsa, sekin ijro tugmasini bosing."],
+  ["Ovoz chiqmasa nima qilaman?", "Qurilma ovozi yoqilganini tekshiring. Sayt brauzerning ichki ovozidan foydalanadi, baʼzi qurilmalarda inglizcha ovoz boʻlmasligi mumkin. Boshqa brauzerda (masalan, Chrome) sinab koʻring."],
+  ["Savolim boʻlsa kimga yozaman?", "“Men haqimda” boʻlimida Telegram va boshqa havolalar bor."]
+];
+function viewFaq(){
+  var h = '<div class="sechead"><h2>Savol-javob</h2><p>Koʻp beriladigan savollar.</p></div><div class="panel faq">';
+  FAQ.forEach(function(f){ h += '<details><summary>' + esc(f[0]) + '</summary><p>' + esc(f[1]) + '</p></details>'; });
+  $("#view").innerHTML = h + '</div>';
+}
+
+loadUser();
+renderTabs();
+renderWho();
+paintStats();
+route();
+</script>
+
+</body></html>
